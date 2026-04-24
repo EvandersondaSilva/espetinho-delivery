@@ -8,7 +8,6 @@
     ], // Bibliotecas de tipos incluídas
     "moduleResolution": "node", // Estratégia de resolução de módulos (Node.js)
     // Diretórios
-    "ignoreDeprecations": "6.0",
     "outDir": "./dist", // Pasta de saída dos arquivos compilados
     "rootDir": "./src", // Pasta raiz dos arquivos fonte
     // Strict Type-Checking Options (TypeScript 5.6)
