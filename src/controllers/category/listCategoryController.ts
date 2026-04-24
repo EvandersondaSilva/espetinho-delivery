@@ -3,7 +3,7 @@ import { ListCategoryService } from '../../services/category/listCategoryService
 
 
 class ListCategoryController {
-    async handle(req: Request, res: Response) {
+    async handle(_: Request, res: Response) {
 
         const listCategoryService = new ListCategoryService();
 
