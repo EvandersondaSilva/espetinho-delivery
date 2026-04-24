@@ -22,12 +22,14 @@ app.use((error: Error, _: Request, res: Response, _next: NextFunction) => {
     })
 })
 
+app.get("/", (_: Request, res: Response) => {
+    res.send("API rodando 🚀");
+});
+
+
 const PORT = process.env.PORT! || 3333;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-app.get("/", (_: Request, res: Response) => {
-    res.send("API rodando 🚀");
-});
 
