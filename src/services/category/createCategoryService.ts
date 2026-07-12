@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
 
 interface CreateCategoryResponse {
     name: string;
@@ -22,7 +23,7 @@ class CreateCategoryService {
             return category
 
         } catch (error) {
-            throw new Error("Falha ao criar categoria")
+            throw new AppError("Falha ao criar categoria", 500)
 
         }
     }

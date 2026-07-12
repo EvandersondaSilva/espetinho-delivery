@@ -1,35 +1,27 @@
 import prismaClient from "../../prisma"
+import { AppError } from "../../errors/AppError"
 
-
-class detailUserService {
+class DetailUserService {
     async execute(user_id: string) {
-
-        try {
-
-            const user = await prismaClient.user.findFirst({
-                where: {
-                    id: user_id
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true,
-                    createdAt: true
-                }
-            })
-
-            if (!user) {
-                throw new Error("Usuário não encontrado")
+        const user = await prismaClient.user.findFirst({
+            where: {
+                id: user_id
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                createdAt: true
             }
+        })
 
-            return user
-
-        } catch (error) {
-            throw new Error("Usuário não encontrado")
+        if (!user) {
+            throw new AppError("Usuário não encontrado", 404)
         }
 
+        return user
     }
 }
 
-export { detailUserService }
+export { DetailUserService }

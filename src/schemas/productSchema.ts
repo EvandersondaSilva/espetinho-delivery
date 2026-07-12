@@ -28,20 +28,12 @@ export const updateProductSchema = z.object({
     }),
 })
 
-export const deleteProductSchema = z.object({
+export const productParamSchema = z.object({
     params: z.object({
         id: z.string().min(1, { message: "Id do produto e obrigatorio" }),
     }),
 })
 
-export const disableProductSchema = z.object({
-    params: z.object({
-        id: z.string().min(1, { message: "Id do produto e obrigatorio" }),
-    }),
-})
-
-export const enableProductSchema = z.object({
-    params: z.object({
-        id: z.string().min(1, { message: "Id do produto e obrigatorio" }),
-    }),
-})
+export const deleteProductSchema = productParamSchema
+export const disableProductSchema = productParamSchema
+export const enableProductSchema = productParamSchema

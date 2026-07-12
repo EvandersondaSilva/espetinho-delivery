@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { detailUserService } from "../../services/user/detailsUserService";
+import { DetailUserService } from "../../services/user/detailsUserService";
 
 
 class DetailUserController {
@@ -7,7 +7,7 @@ class DetailUserController {
 
         const user_id = req.user_id;
 
-        const detailUser = new detailUserService()
+        const detailUser = new DetailUserService()
 
         const user = await detailUser.execute(user_id)
 

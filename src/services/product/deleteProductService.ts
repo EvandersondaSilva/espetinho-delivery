@@ -1,4 +1,6 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { productSelect } from "../../prisma/selects";
 
 interface DeleteProductRequest {
     id: string;
@@ -8,23 +10,13 @@ class DeleteProductService {
     async execute({ id }: DeleteProductRequest) {
         try {
             const product = await prismaClient.product.delete({
-                where: {
-                    id: id,
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    description: true,
-                    imageUrl: true,
-                    categoryId: true,
-                    createdAt: true,
-                },
+                where: { id },
+                select: productSelect,
             });
 
             return product;
         } catch (error) {
-            throw new Error("Falha ao deletar produto");
+            throw new AppError("Falha ao deletar produto", 500);
         }
     }
 }

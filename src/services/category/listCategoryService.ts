@@ -1,5 +1,6 @@
 
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
 
 class ListCategoryService {
     async execute() {
@@ -18,7 +19,7 @@ class ListCategoryService {
 
 
         } catch (error) {
-            throw new Error("Falha ao listar categorias")
+            throw new AppError("Falha ao listar categorias", 500)
         }
     }
 }

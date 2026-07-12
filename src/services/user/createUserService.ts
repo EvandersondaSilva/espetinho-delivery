@@ -1,6 +1,7 @@
 
 import prismaClient from "../../prisma";
 import { hash } from 'bcryptjs'
+import { AppError } from "../../errors/AppError"
 
 interface CreateUserRequest {
     name: string;
@@ -18,7 +19,7 @@ class CreateUserService {
         })
 
         if (userAlreadyExists) {
-            throw new Error("Usuario já existente")
+            throw new AppError("Usuario já existente", 409)
         }
 
         const passwordHash = await hash(password, 8)

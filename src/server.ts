@@ -3,6 +3,7 @@ import "dotenv/config";
 import express, { NextFunction } from "express";
 import routes from "./routes";
 import { Request, Response } from "express";
+import { AppError } from "./errors/AppError";
 
 const app = express();
 
@@ -11,15 +12,15 @@ app.use(cors());
 app.use(routes);
 
 app.use((error: Error, _: Request, res: Response, _next: NextFunction) => {
-    if (error instanceof Error) {
-        return res.status(400).json({
-            error: error.message
-        })
+    if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message })
     }
 
-    return res.status(500).json({
-        error: "Internal server error!"
-    })
+    if (error instanceof Error) {
+        return res.status(500).json({ error: error.message })
+    }
+
+    return res.status(500).json({ error: "Internal server error!" })
 })
 
 app.get("/", (_: Request, res: Response) => {

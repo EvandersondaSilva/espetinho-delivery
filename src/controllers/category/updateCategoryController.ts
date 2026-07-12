@@ -3,9 +3,8 @@ import { UpdateCategoryService } from "../../services/category/updateCategorySer
 
 class UpdateCategoryController {
     async handle(req: Request, res: Response) {
-        const { id } = req.params;
+        const categoryId = req.params.id as string;
         const { name } = req.body;
-        const categoryId = Array.isArray(id) ? (id[0] ?? "") : (id ?? "");
 
         const updateCategory = new UpdateCategoryService();
 

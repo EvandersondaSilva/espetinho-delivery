@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma/index";
 import cloudinary from "../../config/cloudinary";
 import { Readable } from "node:stream";
+import { AppError } from "../../errors/AppError";
 
 interface CreateProductServiceProps {
     name: string;
@@ -21,7 +22,7 @@ class CreateProductService {
         })
 
         if (!categoryExists) {
-            throw new Error("Category does not exist");
+            throw new AppError("Categoria não encontrada", 404);
         }
 
         let bannerUrl: string | null = null;
@@ -46,7 +47,7 @@ class CreateProductService {
                 bannerUrl = result.secure_url;
             } catch (error) {
                 console.log("Cloudinary error", error)
-                throw new Error("Error uploading image");
+                throw new AppError("Falha ao fazer upload da imagem", 500);
             }
         }
 

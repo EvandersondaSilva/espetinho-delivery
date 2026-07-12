@@ -1,24 +1,12 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { orderSelect } from "../../prisma/selects";
 
 interface AddOrderItemRequest {
     orderId: string;
     productId: string;
     quantity: number;
 }
-
-export const orderItemSelect = {
-    id: true,
-    productId: true,
-    quantity: true,
-    price: true,
-    product: {
-        select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-        },
-    },
-} as const;
 
 class AddOrderItemService {
     async execute({ orderId, productId, quantity }: AddOrderItemRequest) {
@@ -36,7 +24,7 @@ class AddOrderItemService {
                 });
 
                 if (!order) {
-                    throw new Error("Pedido nao encontrado");
+                    throw new AppError("Pedido não encontrado", 404);
                 }
 
                 const product = await tx.product.findUnique({
@@ -49,11 +37,11 @@ class AddOrderItemService {
                 });
 
                 if (!product) {
-                    throw new Error("Produto nao existe");
+                    throw new AppError("Produto não encontrado", 404);
                 }
 
                 if (!product.available) {
-                    throw new Error("Produto indisponivel");
+                    throw new AppError("Produto indisponível", 422);
                 }
 
                 const existing = order.items.find((item) => item.productId === productId);
@@ -85,31 +73,14 @@ class AddOrderItemService {
                 const updated = await tx.order.update({
                     where: { id: orderId },
                     data: { total },
-                    select: {
-                        id: true,
-                        customerName: true,
-                        phone: true,
-                        address: true,
-                        deliveryFee: true,
-                        total: true,
-                        status: true,
-                        createdAt: true,
-                        items: {
-                            select: orderItemSelect,
-                        },
-                    },
+                    select: orderSelect,
                 });
 
                 return updated;
             });
         } catch (error) {
-            if (
-                error instanceof Error &&
-                ["Pedido nao encontrado", "Produto nao existe", "Produto indisponivel"].includes(error.message)
-            ) {
-                throw error;
-            }
-            throw new Error("Falha ao adicionar item ao pedido");
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao adicionar item ao pedido", 500);
         }
     }
 }

@@ -3,8 +3,7 @@ import { DeleteOrderItemService } from "../../services/order/deleteOrderItemServ
 
 class DeleteOrderItemController {
     async handle(req: Request, res: Response) {
-        const { id } = req.params;
-        const orderItemId = Array.isArray(id) ? (id[0] ?? "") : (id ?? "");
+        const orderItemId = req.params.id as string;
 
         const deleteOrderItemService = new DeleteOrderItemService();
 

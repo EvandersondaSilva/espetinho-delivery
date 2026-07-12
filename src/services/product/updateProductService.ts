@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import cloudinary from "../../config/cloudinary";
 import { Readable } from "node:stream";
+import { AppError } from "../../errors/AppError";
 
 interface UpdateProductServiceProps {
     id: string;
@@ -29,7 +30,7 @@ class UpdateProductService {
         });
 
         if (!productExists) {
-            throw new Error("Product does not exist");
+            throw new AppError("Produto não encontrado", 404);
         }
 
         const categoryExists = await prismaClient.category.findFirst({
@@ -37,7 +38,7 @@ class UpdateProductService {
         });
 
         if (!categoryExists) {
-            throw new Error("Category does not exist");
+            throw new AppError("Categoria não encontrada", 404);
         }
 
         let bannerUrl: string | undefined;
@@ -64,7 +65,7 @@ class UpdateProductService {
                 bannerUrl = result.secure_url;
             } catch (error) {
                 console.log("Cloudinary error", error);
-                throw new Error("Error uploading image");
+                throw new AppError("Falha ao fazer upload da imagem", 500);
             }
         }
 
@@ -93,7 +94,8 @@ class UpdateProductService {
 
             return product;
         } catch (error) {
-            throw new Error("Falha ao editar produto");
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao editar produto", 500);
         }
     }
 }

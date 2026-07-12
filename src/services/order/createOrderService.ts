@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
 
 interface CreateOrderItemRequest {
     productId: string;
@@ -31,20 +32,20 @@ class CreateOrderService {
         });
 
         if (products.length !== uniqueProductIds.length) {
-            throw new Error("Um ou mais produtos nao existem");
+            throw new AppError("Um ou mais produtos não existem", 404);
         }
 
         const productsMap = new Map(products.map((product) => [product.id, product]));
 
         const unavailableItem = items.find((item) => !productsMap.get(item.productId)?.available);
         if (unavailableItem) {
-            throw new Error("Pedido contem produto indisponivel");
+            throw new AppError("Pedido contém produto indisponível", 422);
         }
 
         const orderItemsData = items.map((item) => {
             const product = productsMap.get(item.productId);
             if (!product) {
-                throw new Error("Um ou mais produtos nao existem");
+                throw new AppError("Um ou mais produtos não existem", 404);
             }
 
             return {
@@ -97,8 +98,9 @@ class CreateOrderService {
             });
 
             return order;
-        } catch {
-            throw new Error("Falha ao criar pedido");
+        } catch (error) {
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao criar pedido", 500);
         }
     }
 }

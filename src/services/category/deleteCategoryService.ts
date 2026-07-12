@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
 
 interface DeleteCategoryRequest {
     id: string;
@@ -21,7 +22,7 @@ class DeleteCategoryService {
             return category;
 
         } catch (error) {
-            throw new Error("Falha ao deletar categoria");
+            throw new AppError("Falha ao deletar categoria", 500);
 
         }
     }

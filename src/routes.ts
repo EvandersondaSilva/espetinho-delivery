@@ -9,7 +9,7 @@ import { UpdateCategoryController } from "./controllers/category/updateCategoryC
 import { DeleteCategoryController } from "./controllers/category/deleteCategoryController";
 import { CreateProductController } from "./controllers/product/createProductController";
 import { ListProductController } from "./controllers/product/listProductController";
-import { createProductSchema, deleteProductSchema, disableProductSchema, enableProductSchema, listProductsByCategorySchema, updateProductSchema } from "./schemas/productSchema";
+import { createProductSchema, deleteProductSchema, disableProductSchema, enableProductSchema, listProductsByCategorySchema, productParamSchema, updateProductSchema } from "./schemas/productSchema";
 import { ListProductsByCategoryController } from "./controllers/product/listProductsByCategoryController";
 import { UpdateProductController } from "./controllers/product/updateProductController";
 import { DeleteProductController } from "./controllers/product/deleteProductController";
@@ -30,7 +30,7 @@ import { DetailUserController } from "./controllers/user/detailsUserController";
 import { isAuthenticated } from "./middlewares/isAuthenticated";
 
 const routes = Router();
-const upoload = multer(uploadConfig)
+const upload = multer(uploadConfig)
 
 // users
 routes.post("/users", isAuthenticated, validateSchema(createUserSchema), new CreateUserController().handle)
@@ -57,10 +57,10 @@ routes.put("/category/:id", isAuthenticated, validateSchema(updateCategorySchema
 routes.delete("/category/:id", isAuthenticated, validateSchema(deleteCategorySchema), new DeleteCategoryController().handle)
 
 // criando produto
-routes.post("/product", isAuthenticated, upoload.single('file'), validateSchema(createProductSchema), new CreateProductController().handle)
+routes.post("/product", isAuthenticated, upload.single('file'), validateSchema(createProductSchema), new CreateProductController().handle)
 
 // editar produto
-routes.put("/product/:id", isAuthenticated, upoload.single('file'), validateSchema(updateProductSchema), new UpdateProductController().handle)
+routes.put("/product/:id", isAuthenticated, validateSchema(productParamSchema), upload.single('file'), validateSchema(updateProductSchema), new UpdateProductController().handle)
 
 // desabilitar produto
 routes.patch("/product/:id/disable", isAuthenticated, validateSchema(disableProductSchema), new DisableProductController().handle)
@@ -78,10 +78,10 @@ routes.delete("/product/:id", isAuthenticated, validateSchema(deleteProductSchem
 routes.post("/order", validateSchema(createOrderSchema), new CreateOrderController().handle)
 
 // adicionar item ao pedido
-routes.post("/order-item", validateSchema(createOrderItemSchema), new AddOrderItemController().handle)
+routes.post("/order-item", isAuthenticated, validateSchema(createOrderItemSchema), new AddOrderItemController().handle)
 
 // remover item do pedido
-routes.delete("/order-item/:id", validateSchema(deleteOrderItemSchema), new DeleteOrderItemController().handle)
+routes.delete("/order-item/:id", isAuthenticated, validateSchema(deleteOrderItemSchema), new DeleteOrderItemController().handle)
 
 // listar pedidos
 routes.get("/orders", isAuthenticated, new ListOrdersController().handle)

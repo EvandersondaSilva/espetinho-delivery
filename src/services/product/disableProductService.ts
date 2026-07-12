@@ -1,4 +1,6 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { productSelect } from "../../prisma/selects";
 
 interface DisableProductRequest {
     id: string;
@@ -11,30 +13,19 @@ class DisableProductService {
         });
 
         if (!productExists) {
-            throw new Error("Product does not exist");
+            throw new AppError("Produto não encontrado", 404);
         }
 
         try {
             const product = await prismaClient.product.update({
                 where: { id },
-                data: {
-                    available: false,
-                },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    description: true,
-                    imageUrl: true,
-                    available: true,
-                    categoryId: true,
-                    createdAt: true,
-                },
+                data: { available: false },
+                select: productSelect,
             });
 
             return product;
         } catch {
-            throw new Error("Falha ao desabilitar produto");
+            throw new AppError("Falha ao desabilitar produto", 500);
         }
     }
 }

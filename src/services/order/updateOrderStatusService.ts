@@ -1,4 +1,6 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { orderSelect } from "../../prisma/selects";
 
 interface UpdateOrderStatusRequest {
     id: string;
@@ -13,43 +15,19 @@ class UpdateOrderStatusService {
         });
 
         if (!orderExists) {
-            throw new Error("Pedido nao encontrado");
+            throw new AppError("Pedido não encontrado", 404);
         }
 
         try {
             const order = await prismaClient.order.update({
                 where: { id },
                 data: { status },
-                select: {
-                    id: true,
-                    customerName: true,
-                    phone: true,
-                    address: true,
-                    deliveryFee: true,
-                    total: true,
-                    status: true,
-                    createdAt: true,
-                    items: {
-                        select: {
-                            id: true,
-                            productId: true,
-                            quantity: true,
-                            price: true,
-                            product: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    imageUrl: true,
-                                },
-                            },
-                        },
-                    },
-                },
+                select: orderSelect,
             });
 
             return order;
         } catch {
-            throw new Error("Falha ao atualizar status do pedido");
+            throw new AppError("Falha ao atualizar status do pedido", 500);
         }
     }
 }

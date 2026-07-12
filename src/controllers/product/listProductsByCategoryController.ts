@@ -3,8 +3,7 @@ import { ListProductsByCategoryService } from "../../services/product/listProduc
 
 class ListProductsByCategoryController {
     async handle(req: Request, res: Response) {
-        const { id } = req.params;
-        const categoryId = Array.isArray(id) ? (id[0] ?? "") : (id ?? "");
+        const categoryId = req.params.id as string;
 
         const listProductsByCategoryService = new ListProductsByCategoryService();
 

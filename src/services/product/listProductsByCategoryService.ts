@@ -1,4 +1,6 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { productSelect } from "../../prisma/selects";
 
 class ListProductsByCategoryService {
     async execute(categoryId: string) {
@@ -8,30 +10,19 @@ class ListProductsByCategoryService {
             });
 
             if (!categoryExists) {
-                throw new Error("Category does not exist");
+                throw new AppError("Categoria não encontrada", 404);
             }
 
             const products = await prismaClient.product.findMany({
                 where: { categoryId },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    description: true,
-                    imageUrl: true,
-                    available: true,
-                    categoryId: true,
-                    createdAt: true,
-                },
+                select: productSelect,
                 orderBy: { createdAt: "desc" },
             });
 
             return products;
         } catch (error) {
-            if (error instanceof Error && error.message === "Category does not exist") {
-                throw error;
-            }
-            throw new Error("Falha ao listar produtos por categoria");
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao listar produtos por categoria", 500);
         }
     }
 }

@@ -3,8 +3,7 @@ import { DeleteCategoryService } from "../../services/category/deleteCategorySer
 
 class DeleteCategoryController {
     async handle(req: Request, res: Response) {
-        const { id } = req.params;
-        const categoryId = Array.isArray(id) ? (id[0] ?? "") : (id ?? "");
+        const categoryId = req.params.id as string;
 
         const deleteCategory = new DeleteCategoryService();
 

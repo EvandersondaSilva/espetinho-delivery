@@ -3,10 +3,8 @@ import { UpdateProductService } from "../../services/product/updateProductServic
 
 class UpdateProductController {
     async handle(req: Request, res: Response) {
-        const { id } = req.params;
+        const productId = req.params.id as string;
         const { name, price, description, categoryId, removeImage } = req.body;
-
-        const productId = Array.isArray(id) ? (id[0] ?? "") : (id ?? "");
 
         const updateProduct = new UpdateProductService();
 

@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
 
 interface UpdateCategoryRequest {
     id: string;
@@ -25,7 +26,7 @@ class UpdateCategoryService {
             return category;
 
         } catch (error) {
-            throw new Error("Falha ao editar categoria");
+            throw new AppError("Falha ao editar categoria", 500);
 
         }
     }

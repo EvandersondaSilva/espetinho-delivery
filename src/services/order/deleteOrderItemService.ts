@@ -1,5 +1,6 @@
 import prismaClient from "../../prisma";
-import { orderItemSelect } from "./addOrderItemService";
+import { AppError } from "../../errors/AppError";
+import { orderSelect } from "../../prisma/selects";
 
 interface DeleteOrderItemRequest {
     id: string;
@@ -15,7 +16,7 @@ class DeleteOrderItemService {
                 });
 
                 if (!orderItem) {
-                    throw new Error("Item do pedido nao encontrado");
+                    throw new AppError("Item do pedido não encontrado", 404);
                 }
 
                 const orderId = orderItem.orderId;
@@ -26,7 +27,7 @@ class DeleteOrderItemService {
                 });
 
                 if (!order) {
-                    throw new Error("Pedido nao encontrado");
+                    throw new AppError("Pedido não encontrado", 404);
                 }
 
                 await tx.orderItem.delete({
@@ -44,31 +45,14 @@ class DeleteOrderItemService {
                 const updated = await tx.order.update({
                     where: { id: orderId },
                     data: { total },
-                    select: {
-                        id: true,
-                        customerName: true,
-                        phone: true,
-                        address: true,
-                        deliveryFee: true,
-                        total: true,
-                        status: true,
-                        createdAt: true,
-                        items: {
-                            select: orderItemSelect,
-                        },
-                    },
+                    select: orderSelect,
                 });
 
                 return updated;
             });
         } catch (error) {
-            if (
-                error instanceof Error &&
-                ["Item do pedido nao encontrado", "Pedido nao encontrado"].includes(error.message)
-            ) {
-                throw error;
-            }
-            throw new Error("Falha ao remover item do pedido");
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao remover item do pedido", 500);
         }
     }
 }

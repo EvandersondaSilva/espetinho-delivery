@@ -1,4 +1,6 @@
 import prismaClient from "../../prisma";
+import { AppError } from "../../errors/AppError";
+import { orderSelect } from "../../prisma/selects";
 
 interface GetOrderByIdRequest {
     id: string;
@@ -9,43 +11,17 @@ class GetOrderByIdService {
         try {
             const order = await prismaClient.order.findUnique({
                 where: { id },
-                select: {
-                    id: true,
-                    customerName: true,
-                    phone: true,
-                    address: true,
-                    deliveryFee: true,
-                    total: true,
-                    status: true,
-                    createdAt: true,
-                    items: {
-                        select: {
-                            id: true,
-                            productId: true,
-                            quantity: true,
-                            price: true,
-                            product: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    imageUrl: true,
-                                },
-                            },
-                        },
-                    },
-                },
+                select: orderSelect,
             });
 
             if (!order) {
-                throw new Error("Pedido nao encontrado");
+                throw new AppError("Pedido não encontrado", 404);
             }
 
             return order;
         } catch (error) {
-            if (error instanceof Error && error.message === "Pedido nao encontrado") {
-                throw error;
-            }
-            throw new Error("Falha ao buscar pedido");
+            if (error instanceof AppError) throw error;
+            throw new AppError("Falha ao buscar pedido", 500);
         }
     }
 }
