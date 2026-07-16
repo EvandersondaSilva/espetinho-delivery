@@ -449,6 +449,9 @@ Enum de status: `RECEBIDO` | `PREPARANDO` | `SAIU` | `ENTREGUE` (padrão: `RECEB
 | `deliveryFee` | number | centavos |
 | `total` | number | centavos (itens + taxa) |
 | `status` | string | enum acima |
+| `paymentMethod` | string \| null | `"dinheiro"` \| `"debito"` \| `"credito"` \| `"pix"` — `null` em pedidos criados antes desse campo existir |
+| `changeFor` | number \| null | troco em centavos, só quando `paymentMethod` é `"dinheiro"` e o cliente informou um valor |
+| `noChangeNeeded` | boolean | `true` quando o cliente marcou "não preciso de troco" |
 | `createdAt` | string (ISO) | |
 | `items` | array | ver abaixo |
 | `combos` | array | ver abaixo |
@@ -489,6 +492,9 @@ Enum de status: `RECEBIDO` | `PREPARANDO` | `SAIU` | `ENTREGUE` (padrão: `RECEB
 | `deliveryFee` | number | inteiro ≥ 0, opcional (padrão `0`) |
 | `items` | array | opcional (padrão `[]`) |
 | `combos` | array | opcional (padrão `[]`) |
+| `paymentMethod` | string | obrigatório — `"dinheiro"` \| `"debito"` \| `"credito"` \| `"pix"` |
+| `changeFor` | number | inteiro ≥ 0, opcional — troco em centavos (só faz sentido com `paymentMethod: "dinheiro"`, mas não é validado de forma cruzada) |
+| `noChangeNeeded` | boolean | opcional (padrão `false`) |
 
 > O pedido precisa ter ao menos **1 item ou 1 combo** — se ambos vierem vazios, `400`.
 
@@ -519,6 +525,9 @@ Cada combo: `{ comboId: string, selections: [{ productId: string, quantity: numb
   "phone": "11999990000",
   "address": "Rua A, 100",
   "deliveryFee": 500,
+  "paymentMethod": "dinheiro",
+  "changeFor": 5000,
+  "noChangeNeeded": false,
   "items": [
     { "productId": "prod-uuid-1", "quantity": 2 },
     { "productId": "prod-uuid-2", "quantity": 1 }

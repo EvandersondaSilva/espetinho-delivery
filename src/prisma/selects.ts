@@ -61,6 +61,9 @@ export const orderSelect = {
     deliveryFee: true,
     total: true,
     status: true,
+    paymentMethod: true,
+    changeFor: true,
+    noChangeNeeded: true,
     createdAt: true,
     items: {
         select: orderItemSelect,

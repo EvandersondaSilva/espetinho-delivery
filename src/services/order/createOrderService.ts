@@ -24,6 +24,9 @@ interface CreateOrderRequest {
     deliveryFee?: number;
     items?: CreateOrderItemRequest[];
     combos?: CreateOrderComboRequest[];
+    paymentMethod: string;
+    changeFor?: number;
+    noChangeNeeded?: boolean;
 }
 
 function mergeSelectionsByProduct(selections: CreateOrderComboSelectionRequest[]) {
@@ -37,7 +40,7 @@ function mergeSelectionsByProduct(selections: CreateOrderComboSelectionRequest[]
 }
 
 class CreateOrderService {
-    async execute({ customerName, phone, address, deliveryFee = 0, items = [], combos = [] }: CreateOrderRequest) {
+    async execute({ customerName, phone, address, deliveryFee = 0, items = [], combos = [], paymentMethod, changeFor, noChangeNeeded }: CreateOrderRequest) {
         try {
             return await prismaClient.$transaction(async (tx) => {
                 // --- itens normais ---
@@ -205,6 +208,9 @@ class CreateOrderService {
                         address,
                         deliveryFee,
                         total: orderTotal,
+                        paymentMethod,
+                        changeFor,
+                        noChangeNeeded,
                         items: {
                             create: orderItemsData,
                         },

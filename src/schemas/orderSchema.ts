@@ -25,6 +25,11 @@ export const createOrderSchema = z.object({
                 ).min(1, { message: "Selections do combo nao pode ser vazio" }),
             })
         ).optional().default([]),
+        paymentMethod: z.enum(["dinheiro", "debito", "credito", "pix"], {
+            message: "Forma de pagamento invalida",
+        }),
+        changeFor: z.number().int().min(0, { message: "Troco invalido" }).optional(),
+        noChangeNeeded: z.boolean().optional().default(false),
     }).refine((body) => body.items.length > 0 || body.combos.length > 0, {
         message: "Pedido precisa ter ao menos 1 item ou 1 combo",
         path: ["items"],

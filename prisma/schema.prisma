@@ -92,6 +92,10 @@ model Order {
 
   status OrderStatus @default(RECEBIDO)
 
+  paymentMethod  String? // "dinheiro" | "debito" | "credito" | "pix" (validado no Zod, nao no schema)
+  changeFor      Int? // troco em centavos, so quando paymentMethod = dinheiro
+  noChangeNeeded Boolean @default(false)
+
   stockDeducted Boolean @default(false) // garante que o estoque baixe uma unica vez por pedido
 
   items OrderItem[]
