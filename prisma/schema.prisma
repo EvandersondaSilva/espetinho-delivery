@@ -27,6 +27,11 @@ enum OrderStatus {
   ENTREGUE
 }
 
+enum ComboGroupType {
+  CATEGORY_CHOICE
+  FIXED_PRODUCT
+}
+
 model User {
   id       String @id @default(uuid())
   name     String
@@ -44,6 +49,8 @@ model Category {
   id       String    @id @default(uuid())
   name     String
   products Product[]
+
+  comboGroups ComboGroup[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -65,6 +72,9 @@ model Product {
 
   items OrderItem[]
 
+  comboGroups ComboGroup[]
+  comboItems  OrderComboItem[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -85,6 +95,8 @@ model Order {
   stockDeducted Boolean @default(false) // garante que o estoque baixe uma unica vez por pedido
 
   items OrderItem[]
+
+  combos OrderCombo[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,4 +120,78 @@ model OrderItem {
   updatedAt DateTime @updatedAt
 
   @@map("order_items")
+}
+
+model Combo {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  price       Int
+  imageUrl    String?
+  available   Boolean @default(true)
+
+  groups      ComboGroup[]
+  orderCombos OrderCombo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("combos")
+}
+
+model ComboGroup {
+  id      String @id @default(uuid())
+  comboId String
+  combo   Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+
+  type  ComboGroupType
+  label String
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  minQuantity Int  @default(1)
+  maxQuantity Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("combo_groups")
+}
+
+model OrderCombo {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  comboId String
+  combo   Combo  @relation(fields: [comboId], references: [id])
+
+  price Int
+
+  items OrderComboItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_combos")
+}
+
+model OrderComboItem {
+  id           String     @id @default(uuid())
+  orderComboId String
+  orderCombo   OrderCombo @relation(fields: [orderComboId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  quantity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_combo_items")
 }

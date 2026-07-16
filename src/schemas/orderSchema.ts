@@ -13,7 +13,21 @@ export const createOrderSchema = z.object({
                 productId: z.string().min(1, { message: "Id do produto e obrigatorio" }),
                 quantity: z.number().int().min(1, { message: "Quantidade precisa ser maior que zero" }),
             })
-        ).min(1, { message: "Pedido precisa ter ao menos 1 item" }),
+        ).optional().default([]),
+        combos: z.array(
+            z.object({
+                comboId: z.string().min(1, { message: "Id do combo e obrigatorio" }),
+                selections: z.array(
+                    z.object({
+                        productId: z.string().min(1, { message: "Id do produto e obrigatorio" }),
+                        quantity: z.number().int().min(1, { message: "Quantidade precisa ser maior que zero" }),
+                    })
+                ).min(1, { message: "Selections do combo nao pode ser vazio" }),
+            })
+        ).optional().default([]),
+    }).refine((body) => body.items.length > 0 || body.combos.length > 0, {
+        message: "Pedido precisa ter ao menos 1 item ou 1 combo",
+        path: ["items"],
     }),
 });
 

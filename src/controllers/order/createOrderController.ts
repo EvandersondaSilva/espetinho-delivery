@@ -3,7 +3,7 @@ import { CreateOrderService } from "../../services/order/createOrderService";
 
 class CreateOrderController {
     async handle(req: Request, res: Response) {
-        const { customerName, phone, address, deliveryFee, items } = req.body;
+        const { customerName, phone, address, deliveryFee, items, combos } = req.body;
 
         const createOrder = new CreateOrderService();
 
@@ -13,6 +13,7 @@ class CreateOrderController {
             address,
             deliveryFee,
             items,
+            combos,
         });
 
         return res.status(201).json(order);

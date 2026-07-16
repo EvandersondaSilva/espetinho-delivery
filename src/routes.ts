@@ -28,6 +28,15 @@ import { authUserSchema, createUserSchema } from "./schemas/userSchema";
 import { AuthUserController } from "./controllers/user/authUserController";
 import { DetailUserController } from "./controllers/user/detailsUserController";
 import { isAuthenticated } from "./middlewares/isAuthenticated";
+import { createComboSchema, updateComboSchema, comboParamSchema, deleteComboSchema, disableComboSchema, enableComboSchema } from "./schemas/comboSchema";
+import { CreateComboController } from "./controllers/combo/createComboController";
+import { UpdateComboController } from "./controllers/combo/updateComboController";
+import { ListCombosController } from "./controllers/combo/listCombosController";
+import { ListPublicCombosController } from "./controllers/combo/listPublicCombosController";
+import { GetComboByIdController } from "./controllers/combo/getComboByIdController";
+import { DisableComboController } from "./controllers/combo/disableComboController";
+import { EnableComboController } from "./controllers/combo/enableComboController";
+import { DeleteComboController } from "./controllers/combo/deleteComboController";
 
 const routes = Router();
 const upload = multer(uploadConfig)
@@ -94,5 +103,29 @@ routes.patch("/order/:id/status", isAuthenticated, validateSchema(updateOrderSta
 
 // cancelar pedido
 routes.delete("/order/:id", isAuthenticated, validateSchema(deleteOrderSchema), new DeleteOrderController().handle)
+
+// criar combo
+routes.post("/combo", isAuthenticated, upload.single('file'), validateSchema(createComboSchema), new CreateComboController().handle)
+
+// editar combo
+routes.put("/combo/:id", isAuthenticated, validateSchema(comboParamSchema), upload.single('file'), validateSchema(updateComboSchema), new UpdateComboController().handle)
+
+// listar combos (admin, todos)
+routes.get("/combo", isAuthenticated, new ListCombosController().handle)
+
+// detalhar combo
+routes.get("/combo/:id", isAuthenticated, validateSchema(comboParamSchema), new GetComboByIdController().handle)
+
+// desabilitar combo
+routes.patch("/combo/:id/disable", isAuthenticated, validateSchema(disableComboSchema), new DisableComboController().handle)
+
+// habilitar combo
+routes.patch("/combo/:id/enable", isAuthenticated, validateSchema(enableComboSchema), new EnableComboController().handle)
+
+// deletar combo
+routes.delete("/combo/:id", isAuthenticated, validateSchema(deleteComboSchema), new DeleteComboController().handle)
+
+// listar combos disponiveis (publico)
+routes.get("/combos", new ListPublicCombosController().handle)
 
 export default routes;

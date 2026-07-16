@@ -24,6 +24,35 @@ export const orderItemSelect = {
     },
 } as const
 
+export const orderComboItemSelect = {
+    id: true,
+    productId: true,
+    quantity: true,
+    product: {
+        select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+        },
+    },
+} as const
+
+export const orderComboSelect = {
+    id: true,
+    comboId: true,
+    price: true,
+    combo: {
+        select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+        },
+    },
+    items: {
+        select: orderComboItemSelect,
+    },
+} as const
+
 export const orderSelect = {
     id: true,
     customerName: true,
@@ -35,5 +64,76 @@ export const orderSelect = {
     createdAt: true,
     items: {
         select: orderItemSelect,
+    },
+    combos: {
+        select: orderComboSelect,
+    },
+} as const
+
+export const comboGroupSelect = {
+    id: true,
+    type: true,
+    label: true,
+    categoryId: true,
+    category: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+    productId: true,
+    product: {
+        select: productSelect,
+    },
+    minQuantity: true,
+    maxQuantity: true,
+} as const
+
+export const comboSelect = {
+    id: true,
+    name: true,
+    description: true,
+    price: true,
+    imageUrl: true,
+    available: true,
+    createdAt: true,
+    groups: {
+        select: comboGroupSelect,
+    },
+} as const
+
+export const publicComboGroupSelect = {
+    id: true,
+    type: true,
+    label: true,
+    categoryId: true,
+    category: {
+        select: {
+            id: true,
+            name: true,
+            products: {
+                where: { available: true },
+                select: productSelect,
+            },
+        },
+    },
+    productId: true,
+    product: {
+        select: productSelect,
+    },
+    minQuantity: true,
+    maxQuantity: true,
+} as const
+
+export const publicComboSelect = {
+    id: true,
+    name: true,
+    description: true,
+    price: true,
+    imageUrl: true,
+    available: true,
+    createdAt: true,
+    groups: {
+        select: publicComboGroupSelect,
     },
 } as const
