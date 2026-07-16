@@ -2,6 +2,7 @@ import prismaClient from "../../prisma";
 import cloudinary from "../../config/cloudinary";
 import { Readable } from "node:stream";
 import { AppError } from "../../errors/AppError";
+import { productSelect } from "../../prisma/selects";
 
 interface UpdateProductServiceProps {
     id: string;
@@ -9,6 +10,7 @@ interface UpdateProductServiceProps {
     price: number;
     description?: string;
     categoryId: string;
+    stock?: number;
     imageUrl?: Buffer;
     imageName?: string;
     removeImage?: boolean;
@@ -21,6 +23,7 @@ class UpdateProductService {
         price,
         description,
         categoryId,
+        stock,
         imageUrl,
         imageName,
         removeImage,
@@ -77,19 +80,11 @@ class UpdateProductService {
                     price,
                     description,
                     categoryId,
+                    ...(stock !== undefined && { stock }),
                     ...(bannerUrl !== undefined && { imageUrl: bannerUrl }),
                     ...(removeImage && { imageUrl: null }),
                 },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    description: true,
-                    imageUrl: true,
-                    available: true,
-                    categoryId: true,
-                    createdAt: true,
-                },
+                select: productSelect,
             });
 
             return product;

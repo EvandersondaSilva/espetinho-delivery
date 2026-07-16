@@ -6,7 +6,10 @@ export const createProductSchema = z.object({
         price: z.string().min(1, { message: "Price is required" }),
         description: z.string().optional(),
         categoryId: z.string().min(1, { message: "Category ID is required" }),
-
+        stock: z.coerce.number({ message: "Estoque precisa ser um número" })
+            .int({ message: "Estoque precisa ser um inteiro" })
+            .min(0, { message: "Estoque não pode ser negativo" })
+            .optional(),
     })
 })
 
@@ -25,6 +28,10 @@ export const updateProductSchema = z.object({
         price: z.string().min(1, { message: "Price is required" }),
         description: z.string().optional(),
         categoryId: z.string().min(1, { message: "Category ID is required" }),
+        stock: z.coerce.number({ message: "Estoque precisa ser um número" })
+            .int({ message: "Estoque precisa ser um inteiro" })
+            .min(0, { message: "Estoque não pode ser negativo" })
+            .optional(),
     }),
 })
 

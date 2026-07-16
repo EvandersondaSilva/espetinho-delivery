@@ -5,6 +5,7 @@ export const productSelect = {
     description: true,
     imageUrl: true,
     available: true,
+    stock: true,
     categoryId: true,
     createdAt: true,
 } as const

@@ -2,18 +2,20 @@ import prismaClient from "../../prisma/index";
 import cloudinary from "../../config/cloudinary";
 import { Readable } from "node:stream";
 import { AppError } from "../../errors/AppError";
+import { productSelect } from "../../prisma/selects";
 
 interface CreateProductServiceProps {
     name: string;
     price: number;
     description?: string;
     categoryId: string;
+    stock?: number;
     imageUrl?: Buffer;
     imageName?: string;
 }
 
 class CreateProductService {
-    async execute({ name, price, description, categoryId, imageUrl, imageName }: CreateProductServiceProps) {
+    async execute({ name, price, description, categoryId, stock, imageUrl, imageName }: CreateProductServiceProps) {
 
         const categoryExists = await prismaClient.category.findFirst({
             where: {
@@ -57,17 +59,10 @@ class CreateProductService {
                 price: price,
                 description: description,
                 imageUrl: bannerUrl, // null se não tiver imagem
-                categoryId: categoryId
+                categoryId: categoryId,
+                ...(stock !== undefined && { stock }),
             },
-            select: {
-                id: true,
-                name: true,
-                price: true,
-                description: true,
-                imageUrl: true,
-                categoryId: true,
-                createdAt: true,
-            }
+            select: productSelect,
         })
 
         return product;

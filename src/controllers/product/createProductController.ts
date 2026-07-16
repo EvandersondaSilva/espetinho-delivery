@@ -3,9 +3,7 @@ import { CreateProductService } from "../../services/product/createProductServic
 
 class CreateProductController {
     async handle(req: Request, res: Response) {
-        const { name, price, description, categoryId } = req.body;
-
-
+        const { name, price, description, categoryId, stock } = req.body;
 
         const createProduct = new CreateProductService();
 
@@ -14,6 +12,7 @@ class CreateProductController {
             price: parseInt(price), // garante que seja número
             description,
             categoryId,
+            stock: stock !== undefined && stock !== "" ? parseInt(stock, 10) : undefined,
             imageUrl: req.file?.buffer,
             imageName: req.file?.originalname,
         });
