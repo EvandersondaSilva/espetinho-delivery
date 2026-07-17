@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { orderSelect } from "../../prisma/selects";
+import { getOrCreateSettings } from "../settings/getOrCreateSettings";
 
 interface CreateOrderItemRequest {
     productId: string;
@@ -41,6 +42,12 @@ function mergeSelectionsByProduct(selections: CreateOrderComboSelectionRequest[]
 
 class CreateOrderService {
     async execute({ customerName, phone, address, deliveryFee = 0, items = [], combos = [], paymentMethod, changeFor, noChangeNeeded }: CreateOrderRequest) {
+        const settings = await getOrCreateSettings();
+
+        if (!settings.isStoreOpen) {
+            throw new AppError("A loja está fechada no momento", 422);
+        }
+
         try {
             return await prismaClient.$transaction(async (tx) => {
                 // --- itens normais ---

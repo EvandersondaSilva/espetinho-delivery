@@ -37,6 +37,9 @@ import { GetComboByIdController } from "./controllers/combo/getComboByIdControll
 import { DisableComboController } from "./controllers/combo/disableComboController";
 import { EnableComboController } from "./controllers/combo/enableComboController";
 import { DeleteComboController } from "./controllers/combo/deleteComboController";
+import { updateStoreStatusSchema } from "./schemas/settingsSchema";
+import { GetSettingsController } from "./controllers/settings/getSettingsController";
+import { UpdateStoreStatusController } from "./controllers/settings/updateStoreStatusController";
 
 const routes = Router();
 const upload = multer(uploadConfig)
@@ -127,5 +130,11 @@ routes.delete("/combo/:id", isAuthenticated, validateSchema(deleteComboSchema), 
 
 // listar combos disponiveis (publico)
 routes.get("/combos", new ListPublicCombosController().handle)
+
+// buscar configuracoes da loja
+routes.get("/settings", new GetSettingsController().handle)
+
+// atualizar status aberto/fechado da loja
+routes.patch("/settings/store-status", isAuthenticated, validateSchema(updateStoreStatusSchema), new UpdateStoreStatusController().handle)
 
 export default routes;

@@ -32,6 +32,16 @@ enum ComboGroupType {
   FIXED_PRODUCT
 }
 
+model Settings {
+  id          String   @id @default(uuid())
+  isStoreOpen Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("settings")
+}
+
 model User {
   id       String @id @default(uuid())
   name     String

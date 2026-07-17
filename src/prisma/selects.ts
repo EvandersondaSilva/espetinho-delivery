@@ -128,6 +128,13 @@ export const publicComboGroupSelect = {
     maxQuantity: true,
 } as const
 
+export const settingsSelect = {
+    id: true,
+    isStoreOpen: true,
+    createdAt: true,
+    updatedAt: true,
+} as const
+
 export const publicComboSelect = {
     id: true,
     name: true,
