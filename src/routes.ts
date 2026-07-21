@@ -15,7 +15,7 @@ import { UpdateProductController } from "./controllers/product/updateProductCont
 import { DeleteProductController } from "./controllers/product/deleteProductController";
 import { DisableProductController } from "./controllers/product/disableProductController";
 import { EnableProductController } from "./controllers/product/enableProductController";
-import { createOrderItemSchema, createOrderSchema, deleteOrderItemSchema, deleteOrderSchema, getOrderByIdSchema, updateOrderStatusSchema } from "./schemas/orderSchema";
+import { createOrderItemSchema, createOrderSchema, deleteOrderItemSchema, deleteOrderSchema, getOrderByIdSchema, listOrdersSchema, updateOrderStatusSchema } from "./schemas/orderSchema";
 import { CreateOrderController } from "./controllers/order/createOrderController";
 import { AddOrderItemController } from "./controllers/order/addOrderItemController";
 import { DeleteOrderItemController } from "./controllers/order/deleteOrderItemController";
@@ -96,7 +96,7 @@ routes.post("/order-item", isAuthenticated, validateSchema(createOrderItemSchema
 routes.delete("/order-item/:id", isAuthenticated, validateSchema(deleteOrderItemSchema), new DeleteOrderItemController().handle)
 
 // listar pedidos
-routes.get("/orders", isAuthenticated, new ListOrdersController().handle)
+routes.get("/orders", isAuthenticated, validateSchema(listOrdersSchema), new ListOrdersController().handle)
 
 // detalhar pedido
 routes.get("/order/:id", isAuthenticated, validateSchema(getOrderByIdSchema), new GetOrderByIdController().handle)

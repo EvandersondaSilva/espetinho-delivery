@@ -3,16 +3,18 @@ import { ListOrdersService } from "../../services/order/listOrdersService";
 
 class ListOrdersController {
     async handle(req: Request, res: Response) {
-        // Mantém a assinatura padrão de controllers, mas evita warning de parâmetro não utilizado.
-        void req;
+        const { page, limit, status } = req.query;
 
         const listOrdersService = new ListOrdersService();
 
-        const orders = await listOrdersService.execute();
+        const result = await listOrdersService.execute({
+            page: page ? parseInt(page as string, 10) : 1,
+            limit: limit ? parseInt(limit as string, 10) : 20,
+            status: status as "RECEBIDO" | "PREPARANDO" | "SAIU" | "ENTREGUE" | undefined,
+        });
 
-        return res.status(200).json(orders);
+        return res.status(200).json(result);
     }
 }
 
 export { ListOrdersController };
-

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const orderStatusSchema = z.enum(["RECEBIDO", "PREPARANDO", "SAIU", "ENTREGUE"]);
+export const orderStatusSchema = z.enum(["RECEBIDO", "PREPARANDO", "SAIU", "ENTREGUE"]);
 
 export const createOrderSchema = z.object({
     body: z.object({
@@ -33,6 +33,21 @@ export const createOrderSchema = z.object({
     }).refine((body) => body.items.length > 0 || body.combos.length > 0, {
         message: "Pedido precisa ter ao menos 1 item ou 1 combo",
         path: ["items"],
+    }),
+});
+
+export const listOrdersSchema = z.object({
+    query: z.object({
+        page: z.coerce.number({ message: "page precisa ser um número" })
+            .int({ message: "page precisa ser um número inteiro" })
+            .min(1, { message: "page precisa ser >= 1" })
+            .optional(),
+        limit: z.coerce.number({ message: "limit precisa ser um número" })
+            .int({ message: "limit precisa ser um número inteiro" })
+            .min(1, { message: "limit precisa ser >= 1" })
+            .max(50, { message: "limit não pode ser maior que 50" })
+            .optional(),
+        status: orderStatusSchema.optional(),
     }),
 });
 
