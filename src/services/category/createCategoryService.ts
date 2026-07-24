@@ -3,19 +3,22 @@ import { AppError } from "../../errors/AppError";
 
 interface CreateCategoryResponse {
     name: string;
+    displayOrder?: number;
 }
 
 class CreateCategoryService {
-    async execute({ name }: CreateCategoryResponse) {
+    async execute({ name, displayOrder }: CreateCategoryResponse) {
         try {
 
             const category = await prismaClient.category.create({
                 data: {
-                    name: name
+                    name: name,
+                    ...(displayOrder !== undefined && { displayOrder }),
                 },
                 select: {
                     id: true,
                     name: true,
+                    displayOrder: true,
                     createdAt: true
                 }
             })

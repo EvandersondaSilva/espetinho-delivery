@@ -56,9 +56,10 @@ model User {
 }
 
 model Category {
-  id       String    @id @default(uuid())
-  name     String
-  products Product[]
+  id           String    @id @default(uuid())
+  name         String
+  displayOrder Int       @default(0)
+  products     Product[]
 
   comboGroups ComboGroup[]
 

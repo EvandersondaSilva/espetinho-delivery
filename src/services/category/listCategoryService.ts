@@ -10,9 +10,10 @@ class ListCategoryService {
                 select: {
                     id: true,
                     name: true,
+                    displayOrder: true,
                     createdAt: true
                 },
-                orderBy: { createdAt: "desc" }
+                orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }]
             })
 
             return categories;
