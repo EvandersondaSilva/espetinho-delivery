@@ -88,6 +88,12 @@ O campo `file` **não é obrigatório**. Se omitido, o produto é criado com `im
 - **Antes:** `GET /category` retornava ordenado por `createdAt` desc (mais recente primeiro).
 - **Agora:** ordenado por `displayOrder` asc (menor primeiro); em empate, por `createdAt` asc. Categorias existentes têm `displayOrder: 0` até o admin reordenar.
 
+### 12. Impressão automática de pedidos (NOVO, aditivo)
+
+- Pedido agora tem o campo **`autoPrinted`** (boolean, default `false`), presente em todas as respostas de pedido.
+- Nova rota `PATCH /order/:id/mark-printed` marca `autoPrinted: true` — dá suporte à futura impressão automática via QZ Tray no frontend (evita reimprimir o mesmo pedido a cada polling).
+- Não quebra nada existente: campo novo com default, rota nova.
+
 ---
 
 ## Convenções gerais
@@ -506,6 +512,7 @@ Enum de status: `RECEBIDO` | `PREPARANDO` | `SAIU` | `ENTREGUE` (padrão: `RECEB
 | `paymentMethod` | string \| null | `"dinheiro"` \| `"debito"` \| `"credito"` \| `"pix"` — `null` em pedidos criados antes desse campo existir |
 | `changeFor` | number \| null | troco em centavos, só quando `paymentMethod` é `"dinheiro"` e o cliente informou um valor |
 | `noChangeNeeded` | boolean | `true` quando o cliente marcou "não preciso de troco" |
+| `autoPrinted` | boolean | `true` depois que `PATCH /order/:id/mark-printed` é chamado — usado pelo frontend (QZ Tray) pra não reimprimir o mesmo pedido a cada polling |
 | `createdAt` | string (ISO) | |
 | `items` | array | ver abaixo |
 | `combos` | array | ver abaixo |
@@ -682,6 +689,18 @@ Pedidos ordenados por `createdAt` desc (mais recentes primeiro).
 
 ---
 
+### `PATCH /order/:id/mark-printed` — Marcar pedido como impresso 🔒 JWT
+
+Marca `autoPrinted: true` no pedido. Existe pra suportar a impressão automática via QZ Tray no frontend: a cada polling, o frontend só imprime pedidos com `autoPrinted: false` e chama essa rota depois de imprimir, evitando reimprimir o mesmo pedido.
+
+**Body:** vazio.
+
+**Sucesso:** `200` — pedido completo, com `autoPrinted: true`.
+
+**Erros:** `404` `Pedido não encontrado` · `500` `Falha ao marcar pedido como impresso`
+
+---
+
 ### `DELETE /order/:id` — Cancelar/excluir pedido 🔒 JWT
 
 **Sucesso:** `200` — pedido excluído (último estado, com itens).
@@ -724,6 +743,7 @@ Pedidos ordenados por `createdAt` desc (mais recentes primeiro).
 | GET | `/orders` | 🔒 JWT |
 | GET | `/order/:id` | 🔒 JWT |
 | PATCH | `/order/:id/status` | 🔒 JWT |
+| PATCH | `/order/:id/mark-printed` | 🔒 JWT |
 | DELETE | `/order/:id` | 🔒 JWT |
 
 ---

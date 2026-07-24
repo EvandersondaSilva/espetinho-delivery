@@ -80,6 +80,12 @@ export const createOrderItemSchema = z.object({
     }),
 });
 
+export const markOrderPrintedSchema = z.object({
+    params: z.object({
+        id: z.string().min(1, { message: "Id do pedido e obrigatorio" }),
+    }),
+});
+
 export const deleteOrderItemSchema = z.object({
     params: z.object({
         id: z.string().min(1, { message: "Id do item do pedido e obrigatorio" }),

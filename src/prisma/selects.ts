@@ -64,6 +64,7 @@ export const orderSelect = {
     paymentMethod: true,
     changeFor: true,
     noChangeNeeded: true,
+    autoPrinted: true,
     createdAt: true,
     items: {
         select: orderItemSelect,

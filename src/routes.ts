@@ -15,11 +15,12 @@ import { UpdateProductController } from "./controllers/product/updateProductCont
 import { DeleteProductController } from "./controllers/product/deleteProductController";
 import { DisableProductController } from "./controllers/product/disableProductController";
 import { EnableProductController } from "./controllers/product/enableProductController";
-import { createOrderItemSchema, createOrderSchema, deleteOrderItemSchema, deleteOrderSchema, getOrderByIdSchema, listOrdersSchema, updateOrderStatusSchema } from "./schemas/orderSchema";
+import { createOrderItemSchema, createOrderSchema, deleteOrderItemSchema, deleteOrderSchema, getOrderByIdSchema, listOrdersSchema, markOrderPrintedSchema, updateOrderStatusSchema } from "./schemas/orderSchema";
 import { CreateOrderController } from "./controllers/order/createOrderController";
 import { AddOrderItemController } from "./controllers/order/addOrderItemController";
 import { DeleteOrderItemController } from "./controllers/order/deleteOrderItemController";
 import { ListOrdersController } from "./controllers/order/listOrdersController";
+import { MarkOrderPrintedController } from "./controllers/order/markOrderPrintedController";
 import { GetOrderByIdController } from "./controllers/order/getOrderByIdController";
 import { UpdateOrderStatusController } from "./controllers/order/updateOrderStatusController";
 import { DeleteOrderController } from "./controllers/order/deleteOrderController";
@@ -103,6 +104,9 @@ routes.get("/order/:id", isAuthenticated, validateSchema(getOrderByIdSchema), ne
 
 // atualizar status do pedido
 routes.patch("/order/:id/status", isAuthenticated, validateSchema(updateOrderStatusSchema), new UpdateOrderStatusController().handle)
+
+// marcar pedido como impresso automaticamente (QZ Tray)
+routes.patch("/order/:id/mark-printed", isAuthenticated, validateSchema(markOrderPrintedSchema), new MarkOrderPrintedController().handle)
 
 // cancelar pedido
 routes.delete("/order/:id", isAuthenticated, validateSchema(deleteOrderSchema), new DeleteOrderController().handle)

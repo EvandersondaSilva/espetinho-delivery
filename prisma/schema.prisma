@@ -108,6 +108,7 @@ model Order {
   noChangeNeeded Boolean @default(false)
 
   stockDeducted Boolean @default(false) // garante que o estoque baixe uma unica vez por pedido
+  autoPrinted   Boolean @default(false) // evita reimprimir o mesmo pedido a cada polling do QZ Tray
 
   items OrderItem[]
 
