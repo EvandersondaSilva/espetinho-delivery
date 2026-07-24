@@ -99,7 +99,9 @@ class CreateOrderService {
                                 select: {
                                     type: true,
                                     label: true,
-                                    categoryId: true,
+                                    categories: {
+                                        select: { categoryId: true },
+                                    },
                                     productId: true,
                                     minQuantity: true,
                                     maxQuantity: true,
@@ -161,11 +163,13 @@ class CreateOrderService {
 
                             remaining.delete(group.productId!);
                         } else {
+                            const categoryIds = new Set(group.categories.map((c) => c.categoryId));
                             let sum = 0;
                             const matchedProductIds: string[] = [];
 
                             for (const [productId, quantity] of remaining) {
-                                if (selectionProductsMap.get(productId)?.categoryId === group.categoryId) {
+                                const productCategoryId = selectionProductsMap.get(productId)?.categoryId;
+                                if (productCategoryId && categoryIds.has(productCategoryId)) {
                                     sum += quantity;
                                     matchedProductIds.push(productId);
                                 }

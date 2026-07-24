@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
+import { formatCombos } from "./formatCombo";
 
 class ListCombosService {
     async execute() {
@@ -10,7 +11,7 @@ class ListCombosService {
                 select: comboSelect,
             });
 
-            return combos;
+            return formatCombos(combos);
         } catch {
             throw new AppError("Falha ao listar combos", 500);
         }

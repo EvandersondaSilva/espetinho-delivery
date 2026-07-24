@@ -61,7 +61,7 @@ model Category {
   displayOrder Int       @default(0)
   products     Product[]
 
-  comboGroups ComboGroup[]
+  comboGroupCategories ComboGroupCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -163,8 +163,7 @@ model ComboGroup {
   type  ComboGroupType
   label String
 
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  categories ComboGroupCategory[]
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
@@ -176,6 +175,18 @@ model ComboGroup {
   updatedAt DateTime @updatedAt
 
   @@map("combo_groups")
+}
+
+model ComboGroupCategory {
+  id           String     @id @default(uuid())
+  comboGroupId String
+  comboGroup   ComboGroup @relation(fields: [comboGroupId], references: [id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([comboGroupId, categoryId])
+  @@map("combo_group_categories")
 }
 
 model OrderCombo {

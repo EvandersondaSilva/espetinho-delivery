@@ -78,11 +78,14 @@ export const comboGroupSelect = {
     id: true,
     type: true,
     label: true,
-    categoryId: true,
-    category: {
+    categories: {
         select: {
-            id: true,
-            name: true,
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
         },
     },
     productId: true,
@@ -110,14 +113,17 @@ export const publicComboGroupSelect = {
     id: true,
     type: true,
     label: true,
-    categoryId: true,
-    category: {
+    categories: {
         select: {
-            id: true,
-            name: true,
-            products: {
-                where: { available: true },
-                select: productSelect,
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                    products: {
+                        where: { available: true },
+                        select: productSelect,
+                    },
+                },
             },
         },
     },

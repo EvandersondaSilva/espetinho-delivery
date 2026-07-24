@@ -3,13 +3,13 @@ import { z } from 'zod';
 const comboGroupInputSchema = z.object({
     type: z.enum(["CATEGORY_CHOICE", "FIXED_PRODUCT"], { message: "Tipo de group inválido" }),
     label: z.string().min(1, { message: "Label do group é obrigatório" }),
-    categoryId: z.string().min(1).optional(),
+    categoryIds: z.array(z.string().min(1)).optional(),
     productId: z.string().min(1).optional(),
     minQuantity: z.number().int().min(1, { message: "minQuantity precisa ser >= 1" }),
     maxQuantity: z.number().int().min(1).optional(),
 }).superRefine((group, ctx) => {
-    if (group.type === "CATEGORY_CHOICE" && !group.categoryId) {
-        ctx.addIssue({ code: "custom", path: ["categoryId"], message: "categoryId é obrigatório para group CATEGORY_CHOICE" });
+    if (group.type === "CATEGORY_CHOICE" && (!group.categoryIds || group.categoryIds.length === 0)) {
+        ctx.addIssue({ code: "custom", path: ["categoryIds"], message: "categoryIds precisa ter ao menos 1 categoria para group CATEGORY_CHOICE" });
     }
 
     if (group.type === "FIXED_PRODUCT" && !group.productId) {

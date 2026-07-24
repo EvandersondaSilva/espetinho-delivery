@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
+import { formatCombo } from "./formatCombo";
 
 interface DeleteComboRequest {
     id: string;
@@ -30,7 +31,7 @@ class DeleteComboService {
                 select: comboSelect,
             });
 
-            return combo;
+            return formatCombo(combo);
         } catch {
             throw new AppError("Falha ao deletar combo", 500);
         }

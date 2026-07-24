@@ -4,7 +4,7 @@ import { AppError } from "../../errors/AppError";
 interface ComboGroupInput {
     type: "CATEGORY_CHOICE" | "FIXED_PRODUCT";
     label: string;
-    categoryId?: string;
+    categoryIds?: string[];
     productId?: string;
     minQuantity: number;
     maxQuantity?: number;
@@ -13,20 +13,23 @@ interface ComboGroupInput {
 interface ComboGroupData {
     type: "CATEGORY_CHOICE" | "FIXED_PRODUCT";
     label: string;
-    categoryId: string | null;
     productId: string | null;
     minQuantity: number;
     maxQuantity: number;
+    categories?: { create: { categoryId: string }[] };
 }
 
 // Valida existencia de categoria/produto e garante que nenhum group se
-// sobreponha (mesma categoria usada 2x, ou produto fixo cuja categoria
-// ja e usada por um group CATEGORY_CHOICE do mesmo combo). Isso elimina
-// qualquer ambiguidade na hora de casar as selections do pedido com os
-// groups do combo.
+// sobreponha (uma mesma categoria usada em mais de um group CATEGORY_CHOICE,
+// mesmo que dentro do proprio array categoryIds do group, ou um produto fixo
+// cuja categoria ja e usada por algum group CATEGORY_CHOICE do mesmo combo).
+// Isso elimina qualquer ambiguidade na hora de casar as selections do pedido
+// com os groups do combo.
 async function validateComboGroups(groups: ComboGroupInput[]): Promise<ComboGroupData[]> {
     const categoryIds = [...new Set(
-        groups.filter((group) => group.type === "CATEGORY_CHOICE").map((group) => group.categoryId!)
+        groups
+            .filter((group) => group.type === "CATEGORY_CHOICE")
+            .flatMap((group) => group.categoryIds ?? [])
     )];
 
     const productIds = [...new Set(
@@ -54,15 +57,20 @@ async function validateComboGroups(groups: ComboGroupInput[]): Promise<ComboGrou
 
     const productCategoryMap = new Map(products.map((product) => [product.id, product.categoryId]));
 
+    // Processa os categoryIds de todos os groups CATEGORY_CHOICE em sequencia
+    // contra um unico Set: cobre tanto duplicata dentro do proprio group
+    // quanto overlap entre groups diferentes, com a mesma checagem.
     const seenCategoryIds = new Set<string>();
     for (const group of groups) {
         if (group.type !== "CATEGORY_CHOICE") continue;
 
-        if (seenCategoryIds.has(group.categoryId!)) {
-            throw new AppError("Duas groups do combo não podem usar a mesma categoria", 400);
-        }
+        for (const categoryId of group.categoryIds ?? []) {
+            if (seenCategoryIds.has(categoryId)) {
+                throw new AppError("Duas groups do combo não podem usar a mesma categoria", 400);
+            }
 
-        seenCategoryIds.add(group.categoryId!);
+            seenCategoryIds.add(categoryId);
+        }
     }
 
     for (const group of groups) {
@@ -77,10 +85,14 @@ async function validateComboGroups(groups: ComboGroupInput[]): Promise<ComboGrou
     return groups.map((group) => ({
         type: group.type,
         label: group.label,
-        categoryId: group.type === "CATEGORY_CHOICE" ? group.categoryId! : null,
         productId: group.type === "FIXED_PRODUCT" ? group.productId! : null,
         minQuantity: group.minQuantity,
         maxQuantity: group.maxQuantity ?? group.minQuantity,
+        ...(group.type === "CATEGORY_CHOICE" && {
+            categories: {
+                create: (group.categoryIds ?? []).map((categoryId) => ({ categoryId })),
+            },
+        }),
     }));
 }
 

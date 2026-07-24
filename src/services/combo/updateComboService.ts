@@ -4,6 +4,7 @@ import { Readable } from "node:stream";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
 import { validateComboGroups, ComboGroupInput } from "./validateComboGroups";
+import { formatCombo } from "./formatCombo";
 
 interface UpdateComboServiceProps {
     id: string;
@@ -83,7 +84,7 @@ class UpdateComboService {
                 });
             });
 
-            return combo;
+            return formatCombo(combo);
         } catch (error) {
             if (error instanceof AppError) throw error;
             throw new AppError("Falha ao editar combo", 500);

@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
+import { formatCombo } from "./formatCombo";
 
 interface DisableComboRequest {
     id: string;
@@ -23,7 +24,7 @@ class DisableComboService {
                 select: comboSelect,
             });
 
-            return combo;
+            return formatCombo(combo);
         } catch {
             throw new AppError("Falha ao desabilitar combo", 500);
         }

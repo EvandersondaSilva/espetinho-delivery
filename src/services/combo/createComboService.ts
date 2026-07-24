@@ -4,6 +4,7 @@ import { Readable } from "node:stream";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
 import { validateComboGroups, ComboGroupInput } from "./validateComboGroups";
+import { formatCombo } from "./formatCombo";
 
 interface CreateComboServiceProps {
     name: string;
@@ -57,7 +58,7 @@ class CreateComboService {
                 select: comboSelect,
             });
 
-            return combo;
+            return formatCombo(combo);
         } catch (error) {
             if (error instanceof AppError) throw error;
             throw new AppError("Falha ao criar combo", 500);

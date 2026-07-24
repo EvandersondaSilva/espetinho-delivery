@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
+import { formatCombo } from "./formatCombo";
 
 interface EnableComboRequest {
     id: string;
@@ -23,7 +24,7 @@ class EnableComboService {
                 select: comboSelect,
             });
 
-            return combo;
+            return formatCombo(combo);
         } catch {
             throw new AppError("Falha ao habilitar combo", 500);
         }

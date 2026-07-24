@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 import { comboSelect } from "../../prisma/selects";
+import { formatCombo } from "./formatCombo";
 
 interface GetComboByIdRequest {
     id: string;
@@ -17,7 +18,7 @@ class GetComboByIdService {
             throw new AppError("Combo não encontrado", 404);
         }
 
-        return combo;
+        return formatCombo(combo);
     }
 }
 
