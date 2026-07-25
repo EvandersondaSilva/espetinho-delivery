@@ -9,19 +9,29 @@ import { publicComboSelect } from "../../prisma/selects";
 //   entao nao ha risco de duplicata na agregacao).
 // Achata group.fixedItems (join com combo_group_fixed_items) de
 // [{ product: {...}, quantity }] para [{ ...produto, quantity }].
+// Para PRODUCT_CHOICE, group.choiceProducts (ja filtrado por available:true
+// na query) vira o mesmo campo `products` usado por CATEGORY_CHOICE — o
+// join raw nao e reexposto, so a lista final de produtos.
 function formatPublicComboGroup(group: {
+    type: string;
     categories: { category: { id: string; name: string; products: unknown[] } }[];
     fixedItems: { product: Record<string, unknown>; quantity: number }[];
+    choiceProducts: { product: Record<string, unknown> }[];
     [key: string]: unknown;
 }) {
+    const { categories, fixedItems, choiceProducts, ...rest } = group;
+
     return {
-        ...group,
-        categories: group.categories.map((entry) => ({
+        ...rest,
+        categories: categories.map((entry) => ({
             id: entry.category.id,
             name: entry.category.name,
         })),
-        products: group.categories.flatMap((entry) => entry.category.products),
-        fixedItems: group.fixedItems.map((entry) => ({ ...entry.product, quantity: entry.quantity })),
+        fixedItems: fixedItems.map((entry) => ({ ...entry.product, quantity: entry.quantity })),
+        products:
+            group.type === "PRODUCT_CHOICE"
+                ? choiceProducts.map((entry) => entry.product)
+                : categories.flatMap((entry) => entry.category.products),
     };
 }
 

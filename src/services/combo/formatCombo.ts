@@ -13,6 +13,7 @@ interface RawComboGroupFixedItem {
 interface RawComboGroup {
     categories: RawComboGroupCategory[];
     fixedItems: RawComboGroupFixedItem[];
+    choiceProducts: unknown[];
     [key: string]: unknown;
 }
 

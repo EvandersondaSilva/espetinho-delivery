@@ -30,6 +30,7 @@ enum OrderStatus {
 enum ComboGroupType {
   CATEGORY_CHOICE
   FIXED_PRODUCT
+  PRODUCT_CHOICE
 }
 
 model Settings {
@@ -84,8 +85,9 @@ model Product {
 
   items OrderItem[]
 
-  comboGroupFixedItems ComboGroupFixedItem[]
-  comboItems           OrderComboItem[]
+  comboGroupFixedItems     ComboGroupFixedItem[]
+  comboGroupChoiceProducts ComboGroupChoiceProduct[]
+  comboItems               OrderComboItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -164,8 +166,9 @@ model ComboGroup {
   type  ComboGroupType
   label String
 
-  categories ComboGroupCategory[]
-  fixedItems ComboGroupFixedItem[]
+  categories     ComboGroupCategory[]
+  fixedItems     ComboGroupFixedItem[]
+  choiceProducts ComboGroupChoiceProduct[]
 
   minQuantity Int  @default(1)
   maxQuantity Int?
@@ -200,6 +203,18 @@ model ComboGroupFixedItem {
 
   @@unique([comboGroupId, productId])
   @@map("combo_group_fixed_items")
+}
+
+model ComboGroupChoiceProduct {
+  id           String     @id @default(uuid())
+  comboGroupId String
+  comboGroup   ComboGroup @relation(fields: [comboGroupId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([comboGroupId, productId])
+  @@map("combo_group_choice_products")
 }
 
 model OrderCombo {

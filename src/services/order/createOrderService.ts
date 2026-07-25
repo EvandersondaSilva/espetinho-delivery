@@ -105,6 +105,9 @@ class CreateOrderService {
                                     fixedItems: {
                                         select: { productId: true, quantity: true },
                                     },
+                                    choiceProducts: {
+                                        select: { productId: true },
+                                    },
                                     minQuantity: true,
                                     maxQuantity: true,
                                 },
@@ -165,6 +168,29 @@ class CreateOrderService {
                                 }
 
                                 remaining.delete(fixedItem.productId);
+                            }
+                        } else if (group.type === "PRODUCT_CHOICE") {
+                            const allowedProductIds = new Set(group.choiceProducts.map((cp) => cp.productId));
+                            let sum = 0;
+                            const matchedProductIds: string[] = [];
+
+                            for (const [productId, quantity] of remaining) {
+                                if (allowedProductIds.has(productId)) {
+                                    sum += quantity;
+                                    matchedProductIds.push(productId);
+                                }
+                            }
+
+                            const max = group.maxQuantity ?? group.minQuantity;
+                            if (sum < group.minQuantity || sum > max) {
+                                throw new AppError(
+                                    `Quantidade selecionada para o grupo "${group.label}" do combo "${combo.name}" deve estar entre ${group.minQuantity} e ${max}`,
+                                    400
+                                );
+                            }
+
+                            for (const productId of matchedProductIds) {
+                                remaining.delete(productId);
                             }
                         } else {
                             const categoryIds = new Set(group.categories.map((c) => c.categoryId));

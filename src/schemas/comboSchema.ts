@@ -6,20 +6,17 @@ const fixedItemInputSchema = z.object({
 });
 
 const comboGroupInputSchema = z.object({
-    type: z.enum(["CATEGORY_CHOICE", "FIXED_PRODUCT"], { message: "Tipo de group inválido" }),
+    type: z.enum(["CATEGORY_CHOICE", "FIXED_PRODUCT", "PRODUCT_CHOICE"], { message: "Tipo de group inválido" }),
     label: z.string().min(1, { message: "Label do group é obrigatório" }),
     categoryIds: z.array(z.string().min(1)).optional(),
     fixedItems: z.array(fixedItemInputSchema).optional(),
+    productIds: z.array(z.string().min(1)).optional(),
     minQuantity: z.number().int().min(1, { message: "minQuantity precisa ser >= 1" }).optional(),
     maxQuantity: z.number().int().min(1).optional(),
 }).superRefine((group, ctx) => {
     if (group.type === "CATEGORY_CHOICE") {
         if (!group.categoryIds || group.categoryIds.length === 0) {
             ctx.addIssue({ code: "custom", path: ["categoryIds"], message: "categoryIds precisa ter ao menos 1 categoria para group CATEGORY_CHOICE" });
-        }
-
-        if (group.minQuantity === undefined) {
-            ctx.addIssue({ code: "custom", path: ["minQuantity"], message: "minQuantity é obrigatório para group CATEGORY_CHOICE" });
         }
     }
 
@@ -35,6 +32,27 @@ const comboGroupInputSchema = z.object({
                 }
                 seenProductIds.add(item.productId);
             }
+        }
+    }
+
+    if (group.type === "PRODUCT_CHOICE") {
+        if (!group.productIds || group.productIds.length < 2) {
+            ctx.addIssue({ code: "custom", path: ["productIds"], message: "productIds precisa ter ao menos 2 produtos para group PRODUCT_CHOICE" });
+        } else {
+            const seenProductIds = new Set<string>();
+            for (const productId of group.productIds) {
+                if (seenProductIds.has(productId)) {
+                    ctx.addIssue({ code: "custom", path: ["productIds"], message: "productId duplicado dentro do mesmo group PRODUCT_CHOICE" });
+                    break;
+                }
+                seenProductIds.add(productId);
+            }
+        }
+    }
+
+    if (group.type === "CATEGORY_CHOICE" || group.type === "PRODUCT_CHOICE") {
+        if (group.minQuantity === undefined) {
+            ctx.addIssue({ code: "custom", path: ["minQuantity"], message: "minQuantity é obrigatório para esse tipo de group" });
         }
     }
 
