@@ -88,9 +88,14 @@ export const comboGroupSelect = {
             },
         },
     },
-    productId: true,
-    product: {
-        select: productSelect,
+    fixedItems: {
+        select: {
+            productId: true,
+            quantity: true,
+            product: {
+                select: productSelect,
+            },
+        },
     },
     minQuantity: true,
     maxQuantity: true,
@@ -127,9 +132,14 @@ export const publicComboGroupSelect = {
             },
         },
     },
-    productId: true,
-    product: {
-        select: productSelect,
+    fixedItems: {
+        select: {
+            productId: true,
+            quantity: true,
+            product: {
+                select: productSelect,
+            },
+        },
     },
     minQuantity: true,
     maxQuantity: true,

@@ -1,22 +1,44 @@
 import { z } from 'zod';
 
+const fixedItemInputSchema = z.object({
+    productId: z.string().min(1, { message: "productId é obrigatório" }),
+    quantity: z.number().int().min(1, { message: "quantity precisa ser >= 1" }),
+});
+
 const comboGroupInputSchema = z.object({
     type: z.enum(["CATEGORY_CHOICE", "FIXED_PRODUCT"], { message: "Tipo de group inválido" }),
     label: z.string().min(1, { message: "Label do group é obrigatório" }),
     categoryIds: z.array(z.string().min(1)).optional(),
-    productId: z.string().min(1).optional(),
-    minQuantity: z.number().int().min(1, { message: "minQuantity precisa ser >= 1" }),
+    fixedItems: z.array(fixedItemInputSchema).optional(),
+    minQuantity: z.number().int().min(1, { message: "minQuantity precisa ser >= 1" }).optional(),
     maxQuantity: z.number().int().min(1).optional(),
 }).superRefine((group, ctx) => {
-    if (group.type === "CATEGORY_CHOICE" && (!group.categoryIds || group.categoryIds.length === 0)) {
-        ctx.addIssue({ code: "custom", path: ["categoryIds"], message: "categoryIds precisa ter ao menos 1 categoria para group CATEGORY_CHOICE" });
+    if (group.type === "CATEGORY_CHOICE") {
+        if (!group.categoryIds || group.categoryIds.length === 0) {
+            ctx.addIssue({ code: "custom", path: ["categoryIds"], message: "categoryIds precisa ter ao menos 1 categoria para group CATEGORY_CHOICE" });
+        }
+
+        if (group.minQuantity === undefined) {
+            ctx.addIssue({ code: "custom", path: ["minQuantity"], message: "minQuantity é obrigatório para group CATEGORY_CHOICE" });
+        }
     }
 
-    if (group.type === "FIXED_PRODUCT" && !group.productId) {
-        ctx.addIssue({ code: "custom", path: ["productId"], message: "productId é obrigatório para group FIXED_PRODUCT" });
+    if (group.type === "FIXED_PRODUCT") {
+        if (!group.fixedItems || group.fixedItems.length === 0) {
+            ctx.addIssue({ code: "custom", path: ["fixedItems"], message: "fixedItems precisa ter ao menos 1 produto para group FIXED_PRODUCT" });
+        } else {
+            const seenProductIds = new Set<string>();
+            for (const item of group.fixedItems) {
+                if (seenProductIds.has(item.productId)) {
+                    ctx.addIssue({ code: "custom", path: ["fixedItems"], message: "productId duplicado dentro do mesmo group FIXED_PRODUCT" });
+                    break;
+                }
+                seenProductIds.add(item.productId);
+            }
+        }
     }
 
-    if (group.maxQuantity !== undefined && group.maxQuantity < group.minQuantity) {
+    if (group.minQuantity !== undefined && group.maxQuantity !== undefined && group.maxQuantity < group.minQuantity) {
         ctx.addIssue({ code: "custom", path: ["maxQuantity"], message: "maxQuantity não pode ser menor que minQuantity" });
     }
 });

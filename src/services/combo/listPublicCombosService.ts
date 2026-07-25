@@ -7,8 +7,11 @@ import { publicComboSelect } from "../../prisma/selects";
 // - products: lista unica agregando os produtos disponiveis de TODAS as
 //   categorias do group (cada produto pertence a exatamente 1 categoria,
 //   entao nao ha risco de duplicata na agregacao).
+// Achata group.fixedItems (join com combo_group_fixed_items) de
+// [{ product: {...}, quantity }] para [{ ...produto, quantity }].
 function formatPublicComboGroup(group: {
     categories: { category: { id: string; name: string; products: unknown[] } }[];
+    fixedItems: { product: Record<string, unknown>; quantity: number }[];
     [key: string]: unknown;
 }) {
     return {
@@ -18,6 +21,7 @@ function formatPublicComboGroup(group: {
             name: entry.category.name,
         })),
         products: group.categories.flatMap((entry) => entry.category.products),
+        fixedItems: group.fixedItems.map((entry) => ({ ...entry.product, quantity: entry.quantity })),
     };
 }
 

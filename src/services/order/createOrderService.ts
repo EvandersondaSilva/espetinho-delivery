@@ -102,7 +102,9 @@ class CreateOrderService {
                                     categories: {
                                         select: { categoryId: true },
                                     },
-                                    productId: true,
+                                    fixedItems: {
+                                        select: { productId: true, quantity: true },
+                                    },
                                     minQuantity: true,
                                     maxQuantity: true,
                                 },
@@ -152,16 +154,18 @@ class CreateOrderService {
 
                     for (const group of combo.groups) {
                         if (group.type === "FIXED_PRODUCT") {
-                            const quantity = remaining.get(group.productId!);
+                            for (const fixedItem of group.fixedItems) {
+                                const quantity = remaining.get(fixedItem.productId);
 
-                            if (quantity === undefined || quantity !== group.minQuantity) {
-                                throw new AppError(
-                                    `Seleção do combo "${combo.name}" não atende ao grupo obrigatório "${group.label}"`,
-                                    400
-                                );
+                                if (quantity === undefined || quantity !== fixedItem.quantity) {
+                                    throw new AppError(
+                                        `Seleção do combo "${combo.name}" não atende ao grupo obrigatório "${group.label}"`,
+                                        400
+                                    );
+                                }
+
+                                remaining.delete(fixedItem.productId);
                             }
-
-                            remaining.delete(group.productId!);
                         } else {
                             const categoryIds = new Set(group.categories.map((c) => c.categoryId));
                             let sum = 0;

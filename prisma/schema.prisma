@@ -83,8 +83,8 @@ model Product {
 
   items OrderItem[]
 
-  comboGroups ComboGroup[]
-  comboItems  OrderComboItem[]
+  comboGroupFixedItems ComboGroupFixedItem[]
+  comboItems           OrderComboItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -164,9 +164,7 @@ model ComboGroup {
   label String
 
   categories ComboGroupCategory[]
-
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id])
+  fixedItems ComboGroupFixedItem[]
 
   minQuantity Int  @default(1)
   maxQuantity Int?
@@ -187,6 +185,20 @@ model ComboGroupCategory {
 
   @@unique([comboGroupId, categoryId])
   @@map("combo_group_categories")
+}
+
+model ComboGroupFixedItem {
+  id           String     @id @default(uuid())
+  comboGroupId String
+  comboGroup   ComboGroup @relation(fields: [comboGroupId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity Int @default(1)
+
+  @@unique([comboGroupId, productId])
+  @@map("combo_group_fixed_items")
 }
 
 model OrderCombo {

@@ -1,22 +1,27 @@
 import prismaClient from "../../prisma";
 import { AppError } from "../../errors/AppError";
 
+interface ComboGroupFixedItemInput {
+    productId: string;
+    quantity: number;
+}
+
 interface ComboGroupInput {
     type: "CATEGORY_CHOICE" | "FIXED_PRODUCT";
     label: string;
     categoryIds?: string[];
-    productId?: string;
-    minQuantity: number;
+    fixedItems?: ComboGroupFixedItemInput[];
+    minQuantity?: number;
     maxQuantity?: number;
 }
 
 interface ComboGroupData {
     type: "CATEGORY_CHOICE" | "FIXED_PRODUCT";
     label: string;
-    productId: string | null;
     minQuantity: number;
     maxQuantity: number;
     categories?: { create: { categoryId: string }[] };
+    fixedItems?: { create: { productId: string; quantity: number }[] };
 }
 
 // Valida existencia de categoria/produto e garante que nenhum group se
@@ -33,7 +38,9 @@ async function validateComboGroups(groups: ComboGroupInput[]): Promise<ComboGrou
     )];
 
     const productIds = [...new Set(
-        groups.filter((group) => group.type === "FIXED_PRODUCT").map((group) => group.productId!)
+        groups
+            .filter((group) => group.type === "FIXED_PRODUCT")
+            .flatMap((group) => (group.fixedItems ?? []).map((item) => item.productId))
     )];
 
     const categories = categoryIds.length
@@ -76,25 +83,31 @@ async function validateComboGroups(groups: ComboGroupInput[]): Promise<ComboGrou
     for (const group of groups) {
         if (group.type !== "FIXED_PRODUCT") continue;
 
-        const productCategoryId = productCategoryMap.get(group.productId!);
-        if (productCategoryId && seenCategoryIds.has(productCategoryId)) {
-            throw new AppError("Produto fixo pertence a uma categoria já usada em outro group do combo", 400);
+        for (const item of group.fixedItems ?? []) {
+            const productCategoryId = productCategoryMap.get(item.productId);
+            if (productCategoryId && seenCategoryIds.has(productCategoryId)) {
+                throw new AppError("Produto fixo pertence a uma categoria já usada em outro group do combo", 400);
+            }
         }
     }
 
     return groups.map((group) => ({
         type: group.type,
         label: group.label,
-        productId: group.type === "FIXED_PRODUCT" ? group.productId! : null,
-        minQuantity: group.minQuantity,
-        maxQuantity: group.maxQuantity ?? group.minQuantity,
+        minQuantity: group.type === "CATEGORY_CHOICE" ? group.minQuantity! : 1,
+        maxQuantity: group.type === "CATEGORY_CHOICE" ? (group.maxQuantity ?? group.minQuantity!) : 1,
         ...(group.type === "CATEGORY_CHOICE" && {
             categories: {
                 create: (group.categoryIds ?? []).map((categoryId) => ({ categoryId })),
+            },
+        }),
+        ...(group.type === "FIXED_PRODUCT" && {
+            fixedItems: {
+                create: (group.fixedItems ?? []).map((item) => ({ productId: item.productId, quantity: item.quantity })),
             },
         }),
     }));
 }
 
 export { validateComboGroups };
-export type { ComboGroupInput, ComboGroupData };
+export type { ComboGroupInput, ComboGroupData, ComboGroupFixedItemInput };
