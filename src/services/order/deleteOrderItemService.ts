@@ -12,7 +12,7 @@ class DeleteOrderItemService {
             return await prismaClient.$transaction(async (tx) => {
                 const orderItem = await tx.orderItem.findUnique({
                     where: { id },
-                    select: { id: true, orderId: true },
+                    select: { id: true, orderId: true, productId: true, quantity: true },
                 });
 
                 if (!orderItem) {
@@ -23,16 +23,36 @@ class DeleteOrderItemService {
 
                 const order = await tx.order.findUnique({
                     where: { id: orderId },
-                    select: { deliveryFee: true },
+                    select: {
+                        status: true,
+                        deliveryFee: true,
+                        stockDeducted: true,
+                        combos: {
+                            select: { price: true },
+                        },
+                    },
                 });
 
                 if (!order) {
                     throw new AppError("Pedido não encontrado", 404);
                 }
 
+                if (order.status === "ENTREGUE") {
+                    throw new AppError("Pedido já entregue não pode ser editado", 422);
+                }
+
                 await tx.orderItem.delete({
                     where: { id },
                 });
+
+                // Pedido ja passou por PREPARANDO: o estoque desse item ja foi
+                // baixado, entao remove-lo do pedido devolve a quantidade agora.
+                if (order.stockDeducted) {
+                    await tx.product.update({
+                        where: { id: orderItem.productId },
+                        data: { stock: { increment: orderItem.quantity } },
+                    });
+                }
 
                 const items = await tx.orderItem.findMany({
                     where: { orderId },
@@ -40,7 +60,8 @@ class DeleteOrderItemService {
                 });
 
                 const itemsTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-                const total = itemsTotal + order.deliveryFee;
+                const combosTotal = order.combos.reduce((acc, combo) => acc + combo.price, 0);
+                const total = itemsTotal + combosTotal + order.deliveryFee;
 
                 const updated = await tx.order.update({
                     where: { id: orderId },

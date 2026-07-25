@@ -16,9 +16,14 @@ class AddOrderItemService {
                     where: { id: orderId },
                     select: {
                         id: true,
+                        status: true,
                         deliveryFee: true,
+                        stockDeducted: true,
                         items: {
                             select: { id: true, productId: true, quantity: true },
+                        },
+                        combos: {
+                            select: { price: true },
                         },
                     },
                 });
@@ -27,12 +32,18 @@ class AddOrderItemService {
                     throw new AppError("Pedido não encontrado", 404);
                 }
 
+                if (order.status === "ENTREGUE") {
+                    throw new AppError("Pedido já entregue não pode ser editado", 422);
+                }
+
                 const product = await tx.product.findUnique({
                     where: { id: productId },
                     select: {
                         id: true,
+                        name: true,
                         price: true,
                         available: true,
+                        stock: true,
                     },
                 });
 
@@ -42,6 +53,25 @@ class AddOrderItemService {
 
                 if (!product.available) {
                     throw new AppError("Produto indisponível", 422);
+                }
+
+                // Pedido ja passou por PREPARANDO: o estoque ja foi baixado
+                // uma vez, entao adicionar um item aqui precisa baixar tambem,
+                // na hora, na quantidade que esta sendo adicionada agora.
+                if (order.stockDeducted) {
+                    if (product.stock < quantity) {
+                        throw new AppError(`Estoque insuficiente para o produto ${product.name}`, 422);
+                    }
+
+                    const newStock = product.stock - quantity;
+
+                    await tx.product.update({
+                        where: { id: productId },
+                        data: {
+                            stock: newStock,
+                            ...(newStock === 0 && { available: false }),
+                        },
+                    });
                 }
 
                 const existing = order.items.find((item) => item.productId === productId);
@@ -68,7 +98,8 @@ class AddOrderItemService {
                 });
 
                 const itemsTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-                const total = itemsTotal + order.deliveryFee;
+                const combosTotal = order.combos.reduce((acc, combo) => acc + combo.price, 0);
+                const total = itemsTotal + combosTotal + order.deliveryFee;
 
                 const updated = await tx.order.update({
                     where: { id: orderId },
