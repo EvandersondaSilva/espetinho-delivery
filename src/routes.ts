@@ -38,9 +38,10 @@ import { GetComboByIdController } from "./controllers/combo/getComboByIdControll
 import { DisableComboController } from "./controllers/combo/disableComboController";
 import { EnableComboController } from "./controllers/combo/enableComboController";
 import { DeleteComboController } from "./controllers/combo/deleteComboController";
-import { updateStoreStatusSchema } from "./schemas/settingsSchema";
+import { updateStoreStatusSchema, updateMinOrderValueSchema } from "./schemas/settingsSchema";
 import { GetSettingsController } from "./controllers/settings/getSettingsController";
 import { UpdateStoreStatusController } from "./controllers/settings/updateStoreStatusController";
+import { UpdateMinOrderValueController } from "./controllers/settings/updateMinOrderValueController";
 
 const routes = Router();
 const upload = multer(uploadConfig)
@@ -140,5 +141,8 @@ routes.get("/settings", new GetSettingsController().handle)
 
 // atualizar status aberto/fechado da loja
 routes.patch("/settings/store-status", isAuthenticated, validateSchema(updateStoreStatusSchema), new UpdateStoreStatusController().handle)
+
+// atualizar valor minimo do pedido
+routes.patch("/settings/min-order-value", isAuthenticated, validateSchema(updateMinOrderValueSchema), new UpdateMinOrderValueController().handle)
 
 export default routes;

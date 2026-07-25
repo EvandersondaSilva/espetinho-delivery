@@ -33,11 +33,12 @@ enum ComboGroupType {
 }
 
 model Settings {
-  id          String   @id @default(uuid())
-  isStoreOpen Boolean  @default(true)
+  id            String  @id @default(uuid())
+  isStoreOpen   Boolean @default(true)
+  minOrderValue Int     @default(1000) // em centavos, ex: 1000 = R$ 10,00
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("settings")
 }

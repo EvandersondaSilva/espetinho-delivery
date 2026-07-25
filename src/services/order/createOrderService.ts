@@ -214,6 +214,14 @@ class CreateOrderService {
                     };
                 });
 
+                const productsTotal = itemsTotal + combosTotal;
+                if (productsTotal < settings.minOrderValue) {
+                    throw new AppError(
+                        `Pedido mínimo de R$ ${(settings.minOrderValue / 100).toFixed(2).replace(".", ",")} não atingido`,
+                        422
+                    );
+                }
+
                 const orderTotal = itemsTotal + combosTotal + deliveryFee;
 
                 const order = await tx.order.create({

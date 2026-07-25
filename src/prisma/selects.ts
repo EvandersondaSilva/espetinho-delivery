@@ -148,6 +148,7 @@ export const publicComboGroupSelect = {
 export const settingsSelect = {
     id: true,
     isStoreOpen: true,
+    minOrderValue: true,
     createdAt: true,
     updatedAt: true,
 } as const
